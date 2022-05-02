@@ -1,6 +1,9 @@
 """
 Disclaimer: I'm not proud of this code, it's unclean and full of hardcoding (some of it I did at last minute)
 and I didn't focus on making it clean, so don't judge T_T
+
+To watch this player, my codingame username is 3ataja
+https://www.codingame.com/replay/631557029
 """
 
 import sys
