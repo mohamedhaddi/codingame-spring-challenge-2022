@@ -1,5 +1,5 @@
 """
-Disclaimer: I'm not proud of this code, it's unclean and full of hardcoding and I didn't focus on making it clean, so don't judge T_T
+Disclaimer: I'm not proud of this code, it's unclean and full of hardcoding (some of it I did at last minute) and I didn't focus on making it clean, so don't judge T_T
 """
 
 import sys
