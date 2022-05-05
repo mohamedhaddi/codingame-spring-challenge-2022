@@ -53,13 +53,13 @@ def rank_monsters(monsters, base_x, base_y, enemy_heroes, threat_for):
             threat_level += monster.health
         if monster.threat_for == threat_for:
             threat_level *= 2
-        if threat_for == 1:
-            for enemy in enemy_heroes:
-                base_enemy_dist = math.hypot(base_x - enemy.x, base_y - enemy.y)
-                if base_enemy_dist <= 7000:
-                    monster_enemy_dist = math.hypot(monster.x - enemy.x, monster.y - enemy.y)
-                    if monster_enemy_dist <= 1280 + 800:
-                        threat_level *= 2
+        # if threat_for == 1:
+        #     for enemy in enemy_heroes:
+        #         base_enemy_dist = math.hypot(base_x - enemy.x, base_y - enemy.y)
+        #         if base_enemy_dist <= 7000:
+        #             monster_enemy_dist = math.hypot(monster.x - enemy.x, monster.y - enemy.y)
+        #             if monster_enemy_dist <= 1280 + 800:
+        #                 threat_level *= 2
         monsters_ranked[threat_level] = monster
     monsters_ranked = list(dict(sorted(monsters_ranked.items(), reverse=True)).values())
     return monsters_ranked
@@ -249,6 +249,7 @@ move_towards_pushed_monster = False
 pushed_monster_id = -1
 pushed_monster_coords = {'x': 0, 'y': 0}
 pushed_monster_velocity = {'x': 0, 'y': 0}
+pushed_monster_rounds_count = 0
 
 # game loop
 while True:
@@ -307,9 +308,10 @@ while True:
                 heroes_strategic_points[hero.id] = {'x': x, 'y': y}
                 enemy_monsters_ranked = [monster for monster in enemy_monsters_ranked if math.hypot(hero.x - monster.x, hero.y - monster.y) <= 2200]
 
-                if move_towards_pushed_monster == True and ( \
-                    (not enemy_monsters_ranked) or (enemy_monsters_ranked and pushed_monster_id not in [monster.id for monster in enemy_monsters_ranked]) \
-                ):
+                # if move_towards_pushed_monster == True and ( \
+                #     (not enemy_monsters_ranked) or (enemy_monsters_ranked and pushed_monster_id not in [monster.id for monster in enemy_monsters_ranked]) \
+                # ):
+                if move_towards_pushed_monster == True:
 
                     x = pushed_monster_coords['x']
                     y = pushed_monster_coords['y']
@@ -319,19 +321,22 @@ while True:
                     enemy_base_hero_dist = math.hypot(hero.x - enemy_base_x, hero.y - enemy_base_y)
                     if (initial_heroes_position == 'top-left' and hero.x >= pushed_monster_coords['x'] and hero.y >= pushed_monster_coords['y']) \
                     or (initial_heroes_position == 'bottom-right' and hero.x <= pushed_monster_coords['x'] and hero.y <= pushed_monster_coords['y']) \
+                    or pushed_monster_rounds_count >= 2 \
                     or (not enemy_monsters_ranked) \
-                    or (enemy_monsters_ranked and enemy_monsters_ranked[0].id == pushed_monster_id) \
+                    or (enemy_monsters_ranked and pushed_monster_id in [monster.id for monster in enemy_monsters_ranked]) \
                     or enemy_base_hero_dist <= (400 + 2200):
                         move_towards_pushed_monster = False
+                        pushed_monster_rounds_count = 0
                     else:
                         pushed_monster_coords['x'] += pushed_monster_velocity['vx']
                         pushed_monster_coords['y'] += pushed_monster_velocity['vy']
+                        pushed_monster_rounds_count += 1
 
                 # if there ARE threats to enemy's base
                 elif enemy_monsters_ranked:
 
-                    if move_towards_pushed_monster == True and pushed_monster_id in [monster.id for monster in enemy_monsters_ranked]:
-                        move_towards_pushed_monster = False
+                    # if move_towards_pushed_monster == True and pushed_monster_id in [monster.id for monster in enemy_monsters_ranked]:
+                    #     move_towards_pushed_monster = False
 
                     # monster = sorted(enemy_monsters_ranked, key=lambda monster: math.hypot(hero.x - monster.x, hero.y - monster.y))[0]
                     monster = enemy_monsters_ranked[0]
@@ -360,63 +365,91 @@ while True:
                     # else, wind enemy out of the base if monsters are around none of them are in wind range (or they are but shielded)
                     elif my_mana >= 10 and closest_enemy_to_hero and not closest_enemy_to_hero.shield_life \
                     and closest_enemy_to_hero_dist <= 1280 \
+                    and number_of_monsters_in_hero_range > 0 \
                     and number_of_unshielded_monsters_in_hero_wind_range == 0 \
                     and monster.threat_for == 2 \
                     and enemy_base_monster_dist <= 6500:
                         hero.action = f"SPELL WIND {closest_enemy_to_hero.x - monster.vx * 2200} \
                             {closest_enemy_to_hero.y - monster.vy * 2200} wnd_out_enm#{closest_enemy_to_hero.id}"
                         my_mana -= 10
-                        print(f"dist between hero and enemy {closest_enemy_to_hero.id}: {closest_enemy_to_hero_dist}", file=sys.stderr, flush=True)
-                        print(f"number_of_monsters_in_hero_range: {number_of_monsters_in_hero_range}", file=sys.stderr, flush=True)
-                        print(f"number_of_monsters_in_hero_wind_range: {number_of_monsters_in_hero_wind_range}", file=sys.stderr, flush=True)
-
-                    # else, control enemy out of the base
-                    elif my_mana >= 10 \
-                    and closest_enemy_to_hero and (not closest_enemy_to_hero.shield_life) and closest_enemy_to_hero_dist <= 2200 \
-                    and closest_enemy_to_hero_base_dist >= enemy_base_monster_dist \
-                    and (closest_enemy_to_hero_monster_dist <= hero_monster_dist or closest_enemy_to_hero_monster_dist <= 2400):
-                    # and ((closest_enemy_to_hero_dist > 800 * 2 and monster.health >= 2) or (closest_enemy_to_hero_dist <= 800 * 2 and monster.health >= 6)):
-                        hero.action = f"SPELL CONTROL {closest_enemy_to_hero.id} {base_x} {base_y} ctrl_out_enm#{closest_enemy_to_hero.id}"
-                        my_mana -= 10
-                        if enemy_base_monster_dist < enemy_base_hero_dist:
+                        if enemy_base_monster_dist < enemy_base_hero_dist and monster.health >= 4:
                             move_towards_pushed_monster = True
                             pushed_monster_id = monster.id
                             pushed_monster_coords = {'x': monster.x + monster.vx, 'y': monster.y + monster.vy}
                             pushed_monster_velocity = {'vx': monster.vx, 'vy': monster.vy}
-                            print(f"{monster.id}", file=sys.stderr, flush=True)
 
-                    # else, control the monster into the base
-                    elif my_mana >= 10 and (not monster.shield_life) and monster.threat_for != 2 and hero_monster_dist <= 2200 \
-                    and (\
-                            (monster.health * 100 >= enemy_base_monster_dist // 2) \
-                            or (monster.health >= 8 and enemy_base_monster_dist > 6000) \
-                        )\
-                    and ((not closest_enemy_to_hero) or (closest_enemy_to_hero and closest_enemy_to_hero_monster_dist > hero_monster_dist)) \
-                    and enemy_base_monster_dist > 5000:
-                        hero.action = f"SPELL CONTROL {monster.id} {enemy_base_x} {enemy_base_y} ctrl_in_mnst#{monster.id}"
+                        # DEBUG INFO
+                        # print(f"dist between hero and enemy {closest_enemy_to_hero.id}: {closest_enemy_to_hero_dist}", file=sys.stderr, flush=True)
+                        # print(f"number_of_monsters_in_hero_range: {number_of_monsters_in_hero_range}", file=sys.stderr, flush=True)
+                        # print(f"number_of_monsters_in_hero_wind_range: {number_of_monsters_in_hero_wind_range}", file=sys.stderr, flush=True)
+
+                    # else, control enemy out of the base
+                    elif my_mana >= 10 \
+                    and closest_enemy_to_hero and (not closest_enemy_to_hero.shield_life) and closest_enemy_to_hero_dist <= 2200 \
+                    and enemy_base_monster_dist <= 6500 \
+                    and ( \
+                         (closest_enemy_to_hero_monster_dist > 800 * 2 and monster.health >= 2) \
+                         or (closest_enemy_to_hero_monster_dist <= 800 * 2 and monster.health >= 6) \
+                    ):
+                    # and closest_enemy_to_hero_base_dist >= enemy_base_monster_dist \
+                    # and (closest_enemy_to_hero_monster_dist <= hero_monster_dist or closest_enemy_to_hero_monster_dist <= 2400):
+                        hero.action = f"SPELL CONTROL {closest_enemy_to_hero.id} {base_x} {base_y} ctrl_out_enm#{closest_enemy_to_hero.id}"
                         my_mana -= 10
+                        if enemy_base_monster_dist < enemy_base_hero_dist and monster.health >= 4:
+                            move_towards_pushed_monster = True
+                            pushed_monster_id = monster.id
+                            pushed_monster_coords = {'x': monster.x + monster.vx, 'y': monster.y + monster.vy}
+                            pushed_monster_velocity = {'vx': monster.vx, 'vy': monster.vy}
+
+                            # DEBUG INFO
+                            # print(f"{monster.id}", file=sys.stderr, flush=True)
 
                     # else, wind monster into the base
                     elif my_mana >= 10 and (not monster.shield_life) and hero_monster_dist <= 1280 \
-                    and (
-                        (not closest_enemy_to_hero) \
-                        or (closest_enemy_to_hero and closest_enemy_to_hero_dist > 1280 + 800 and enemy_base_monster_dist <= 8000) \
-                    ):
+                    and enemy_base_monster_dist <= 8000 \
+                    and closest_enemy_to_hero and closest_enemy_to_hero_dist > 1280:
+                    # and ( \
+                    #     (not closest_enemy_to_hero) \
+                    #     or (closest_enemy_to_hero and closest_enemy_to_hero_dist > 1280) \
+                    # ) \
+                    # and monster.health >= 4:
                         x = hero.x + (enemy_base_x - monster.x)
                         y = hero.y + (enemy_base_y - monster.y)
                         new_x = int(monster.x + ((monster.x - enemy_base_x) * -2200) / enemy_base_monster_dist)
                         new_y = int(monster.y + ((monster.y - enemy_base_y) * -2200) / enemy_base_monster_dist)
                         hero.action = f"SPELL WIND {x} {y} wnd_in_mnst#{monster.id}_to#({new_x},{new_y})"
-                        print(f"{hero.id}", file=sys.stderr, flush=True)
                         my_mana -= 10
                         move_towards_pushed_monster = True
                         pushed_monster_id = monster.id
                         pushed_monster_coords = {'x': new_x, 'y': new_y}
                         pushed_monster_velocity = {'vx': monster.vx, 'vy': monster.vy}
 
+                        # DEBUG INFO
+                        # print(f"{hero.id}", file=sys.stderr, flush=True)
+
+                    # else, control the monster into the base
+                    elif my_mana >= 10 and (not monster.shield_life) and monster.threat_for != 2 and hero_monster_dist <= 2200 \
+                    and closest_enemy_to_hero and any([closest_enemy_to_hero_monster_dist <= 800 * i and monster.health >= 2 * (i + 1) for i in range(2, 8)]) \
+                    and hero_monster_dist >= closest_enemy_to_hero_monster_dist \
+                    and 5000 < enemy_base_monster_dist <= 6500:
+                    # and ( \
+                    #      (not closest_enemy_to_hero) \
+                    #      or ( \
+                    #          closest_enemy_to_hero \
+                    #          and any([closest_enemy_to_hero_monster_dist <= 800 * i and monster.health >= 2 * (i + 1) for i in range(2, 8)]) \
+                    #      ) \
+                    # ) \
+                        hero.action = f"SPELL CONTROL {monster.id} {enemy_base_x} {enemy_base_y} ctrl_in_mnst#{monster.id}"
+                        my_mana -= 10
+                        if enemy_base_monster_dist < enemy_base_hero_dist and monster.health >= 4:
+                            move_towards_pushed_monster = True
+                            pushed_monster_id = monster.id
+                            pushed_monster_coords = {'x': monster.x + monster.vx, 'y': monster.y + monster.vy}
+                            pushed_monster_velocity = {'vx': monster.vx, 'vy': monster.vy}
+
                     # else, move to the monster... TO-DO: improve movement, if almost wind or control move less
-                    elif not monster.shield_life and monster.threat_for == 2 \
-                    and ((not closest_enemy_to_hero) or (closest_enemy_to_hero and closest_enemy_to_hero_monster_dist > 800)):
+                    elif enemy_base_monster_dist <= 9000 and not monster.shield_life:
+                    # and ((not closest_enemy_to_hero) or (closest_enemy_to_hero and closest_enemy_to_hero_monster_dist > 800)):
                         x = monster.x + monster.vx
                         y = monster.y + monster.vy
                         x = (x - 850) if x > hero.x else (x + 850)
@@ -456,6 +489,10 @@ while True:
 
                 # if there ARE threats
                 if monsters_ranked:
+
+                    # DEBUG INFO
+                    # print("biggest threat", monsters_ranked[0].id, file=sys.stderr, flush=True)
+                    # print("closest", my_closest_hero_to_biggest_threat, file=sys.stderr, flush=True)
 
                     # if the current hero is the closest to the biggest threat
                     if ((hero.id == my_closest_hero_to_biggest_threat) \
