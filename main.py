@@ -368,6 +368,7 @@ while True:
                         closest_enemy_to_hero_base_dist = math.hypot(closest_enemy_to_hero.x - enemy_base_x, closest_enemy_to_hero.y - enemy_base_y)
 
                     # shield the monster if it's really close and have enough health
+                    ### TO-DO: optimize shield (don't use it if it's not needed, e.g.: no enemy's around, or is too far)
                     if my_mana >= 10 and (not monster.shield_life) and (not monster.is_controlled) and monster.threat_for == 2 \
                     and hero_monster_dist <= 2200 \
                     and any([enemy_base_monster_dist <= 400 * i and monster.health >= 2 * i for i in range(1, 16)]):
@@ -452,7 +453,8 @@ while True:
                             pushed_monster_coords = {'x': monster.x + monster.vx, 'y': monster.y + monster.vy}
                             pushed_monster_velocity = {'vx': monster.vx, 'vy': monster.vy}
 
-                    # else, move to the monster... TO-DO: improve movement, if almost wind or control move less
+                    # else, move to the monster...
+                    ### TO-DO: improve movement, if almost wind or control move less
                     elif enemy_base_monster_dist <= 8000 and not monster.shield_life:
                         x = monster.x + monster.vx
                         y = monster.y + monster.vy
@@ -474,7 +476,8 @@ while True:
                         i_attacker_strategic_points += 1
 
                 # if there are no threats
-                else: # TO-DO: go to parallel monsters
+                ### TO-DO: go to parallel monsters
+                else:
 
                     hero.action = f"MOVE {heroes_strategic_points[hero.id]['x']} {heroes_strategic_points[hero.id]['y']} nxt_pt#3"
                     i_attacker_strategic_points += 1
@@ -576,7 +579,8 @@ while True:
                     monsters_being_dealt_with.append(monster.id)
 
                 # if there are no threats
-                else: # TO-DO: go to parallel monsters
+                ### TO-DO: go to parallel monsters
+                else:
 
                     closest_enemy_to_base = get_closest_enemy_to_base(enemy_heroes, base_x, base_y)
 
