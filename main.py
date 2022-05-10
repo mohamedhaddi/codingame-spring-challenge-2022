@@ -159,6 +159,7 @@ heroes_strategic_points = {
     5: {'x': base_x - 9000, 'y': base_y - 7000}
 }
 
+### TO-DO: don't let them go too far away from their base
 guards_thresholds = {
     1: {
         'min': {'x': 0, 'y': 0},
@@ -234,6 +235,7 @@ attacker_strategic_points = {
     ]
 }
 
+### TO-DO: make them a bit closer to their base
 i_first_defender_strategic_points = 0
 first_defender_strategic_points = {
     1: [
@@ -250,6 +252,7 @@ first_defender_strategic_points = {
     ]
 }
 
+### TO-DO: make them a bit closer to their base
 i_second_defender_strategic_points = 0
 second_defender_strategic_points = {
     2: [
@@ -416,6 +419,7 @@ while True:
                         # print(f"{hero.id}", file=sys.stderr, flush=True)
 
                     # else, control enemy out of the base
+                    ### TO-DO: don't ctrl_out_enm when he's already getting out (his direction is opposite to the monster's direction)
                     elif my_mana >= 10 \
                     and closest_enemy_to_hero and (not closest_enemy_to_hero.shield_life) and closest_enemy_to_hero_dist <= 2200 \
                     and enemy_base_monster_dist <= 6500 \
