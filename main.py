@@ -340,6 +340,8 @@ while True:
                     y = (y - 600) if y > hero.y else (y + 600)
                     hero.action = f"MOVE {x} {y} mv_to#({x},{y})"
                     enemy_base_hero_dist = math.hypot(hero.x - enemy_base_x, hero.y - enemy_base_y)
+
+                    ### TO-DO: add `or if one or more monsters found in range of this hero that is threat_for == 2 and not shielded and not controlled`
                     if (initial_heroes_position == 'top-left' and hero.x >= pushed_monster_coords['x'] and hero.y >= pushed_monster_coords['y']) \
                     or (initial_heroes_position == 'bottom-right' and hero.x <= pushed_monster_coords['x'] and hero.y <= pushed_monster_coords['y']) \
                     or pushed_monster_rounds_count >= 4 \
