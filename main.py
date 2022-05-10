@@ -422,6 +422,7 @@ while True:
                         new_y = int(monster.y + ((monster.y - enemy_base_y) * -2200) / enemy_base_monster_dist)
                         hero.action = f"SPELL WIND {x} {y} wnd_in_mnst#{monster.id}_to#({new_x},{new_y})"
                         my_mana -= 10
+                        # TO-DO: don't make it True if it was pushed to oblivion
                         move_towards_pushed_monster = True
                         pushed_monster_id = monster.id
                         pushed_monster_coords = {'x': new_x, 'y': new_y}
