@@ -379,6 +379,8 @@ while True:
 
                     # shield the monster if it's really close and have enough health
                     ### TO-DO: optimize shield (don't use it if it's not needed, e.g.: no enemy's around, or is too far)
+                    ### TO-DO: try wnd_in_mnst before shield? because this would be faster (sometimes even when a monster is shielded successfully,
+                    ### and is going for a kill, meanwhile the enemy scores goals into my base while i'm waiting for my monster to reach his base)
                     if my_mana >= 10 and (not monster.shield_life) and (not monster.is_controlled) and monster.threat_for == 2 \
                     and hero_monster_dist <= 2200 \
                     and any([enemy_base_monster_dist <= 400 * i and monster.health >= 2 * i for i in range(1, 16)]):
