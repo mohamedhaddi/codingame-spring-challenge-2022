@@ -376,6 +376,7 @@ while True:
                         my_mana -= 10
 
                     # else, wind enemy out of the base if monsters are around none of them are in wind range (or they are but shielded)
+                    ### TO-DO: fix wnd_out_enm fail when the enemy moves away (closest_enemy_to_hero_dist <= (1280 - 800 or 400 or ...) ?)
                     elif my_mana >= 10 and closest_enemy_to_hero and not closest_enemy_to_hero.shield_life \
                     and closest_enemy_to_hero_dist <= 1280 \
                     and closest_enemy_to_hero_monster_dist <= hero_monster_dist \
