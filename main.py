@@ -339,8 +339,7 @@ while True:
                     enemy_base_hero_dist = math.hypot(hero.x - enemy_base_x, hero.y - enemy_base_y)
                     if (initial_heroes_position == 'top-left' and hero.x >= pushed_monster_coords['x'] and hero.y >= pushed_monster_coords['y']) \
                     or (initial_heroes_position == 'bottom-right' and hero.x <= pushed_monster_coords['x'] and hero.y <= pushed_monster_coords['y']) \
-                    or pushed_monster_rounds_count >= 2 \
-                    or (not enemy_monsters_ranked) \
+                    or pushed_monster_rounds_count >= 4 \
                     or (enemy_monsters_ranked and pushed_monster_id in [monster.id for monster in enemy_monsters_ranked]) \
                     or enemy_base_hero_dist <= (400 + 2200):
                         move_towards_pushed_monster = False
@@ -378,12 +377,12 @@ while True:
                     # else, wind enemy out of the base if monsters are around none of them are in wind range (or they are but shielded)
                     elif my_mana >= 10 and closest_enemy_to_hero and not closest_enemy_to_hero.shield_life \
                     and closest_enemy_to_hero_dist <= 1280 \
+                    and closest_enemy_to_hero_monster_dist <= hero_monster_dist \
                     and number_of_monsters_in_hero_range > 0 \
                     and number_of_unshielded_monsters_in_hero_wind_range == 0 \
                     and monster.threat_for == 2 \
                     and enemy_base_monster_dist <= 6500:
-                        hero.action = f"SPELL WIND {closest_enemy_to_hero.x - monster.vx * 2200} \
-                            {closest_enemy_to_hero.y - monster.vy * 2200} wnd_out_enm#{closest_enemy_to_hero.id}"
+                        hero.action = f"SPELL WIND {closest_enemy_to_hero.x - monster.vx * 2200} {closest_enemy_to_hero.y - monster.vy * 2200} wnd_out_enm#{closest_enemy_to_hero.id}"
                         my_mana -= 10
                         if enemy_base_monster_dist < enemy_base_hero_dist and monster.health >= 4:
                             move_towards_pushed_monster = True
@@ -398,8 +397,8 @@ while True:
 
                     # else, wind monster into the base
                     elif my_mana >= 10 and (not monster.shield_life) and hero_monster_dist <= 1280 \
-                    and enemy_base_monster_dist <= 8000 \
-                    and (not closest_enemy_to_hero or (closest_enemy_to_hero and closest_enemy_to_hero_dist > 1280)):
+                    and enemy_base_monster_dist <= 8000:
+                    # and (not closest_enemy_to_hero or (closest_enemy_to_hero and closest_enemy_to_hero_dist > 1280)):
                         x = hero.x + (enemy_base_x - monster.x)
                         y = hero.y + (enemy_base_y - monster.y)
                         new_x = int(monster.x + ((monster.x - enemy_base_x) * -2200) / enemy_base_monster_dist)
@@ -563,9 +562,10 @@ while True:
                     if my_mana >= 10 and (not monster.shield_life) and hero_monster_dist <= 1280 \
                     and ( \
                         (enemy_monster_dist <= 1280 and base_monster_dist <= (2200 + 400)) \
-                        or (monster.health > (math.hypot(monster.x - base_x, monster.y - base_y) / 400) * 2) \
-                    ) \
-                    and monster.id not in winded_monsters:
+                        or (monster.health > (base_monster_dist / 400) * 2) \
+                    ):
+                    # and monster.id not in winded_monsters \
+                    # and base_monster_dist <= (2200 + 400):
                         hero.action = f"SPELL WIND {enemy_base_x} {enemy_base_y} wnd_out_mnst#{monster.id}"
                         winded_monsters.append(monster.id)
                         my_mana -= 10
