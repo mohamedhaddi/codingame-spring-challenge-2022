@@ -460,6 +460,7 @@ while True:
 
                     # else, move to the monster...
                     ### TO-DO: improve movement, if almost wind or control move less
+                    ### TO-DO: maybe it should become a bit more than 8000
                     elif enemy_base_monster_dist <= 8000 and not monster.shield_life:
                         x = monster.x + monster.vx
                         y = monster.y + monster.vy
