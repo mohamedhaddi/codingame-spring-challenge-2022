@@ -423,6 +423,8 @@ while True:
                         move_towards_pushed_monster = True
                         pushed_monster_id = monster.id
                         pushed_monster_coords = {'x': new_x, 'y': new_y}
+                        ### TO-DO: fix bug: velocity changes if monster.threat_for != 2 and then is pushed into the base
+                        ### should this be changed in mv_to?
                         pushed_monster_velocity = {'vx': monster.vx, 'vy': monster.vy}
 
                         # DEBUG INFO
