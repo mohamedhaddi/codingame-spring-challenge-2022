@@ -341,7 +341,12 @@ while True:
                     hero.action = f"MOVE {x} {y} mv_to#({x},{y})"
                     enemy_base_hero_dist = math.hypot(hero.x - enemy_base_x, hero.y - enemy_base_y)
 
-                    ### TO-DO: add `or if one or more monsters found in range of this hero that is threat_for == 2 and not shielded and not controlled`
+                    ### TO-DO: add:
+                    ### `or if one or more monsters found in range of this hero that is threat_for == 2 and not shielded and not controlled
+                    ### (and maybe very close to the base ? how close ? isn't it enough to be threat_for == 2 ?)`
+                    ### the reason for this is that in one case, the hero was following this point (that the pushed monster is going to),
+                    ### but while doing so, there was a monster even closer to the hero that was also going to the base, but since the hero can't
+                    ### see it because he's following this point, he just killed it in the way
                     if (initial_heroes_position == 'top-left' and hero.x >= pushed_monster_coords['x'] and hero.y >= pushed_monster_coords['y']) \
                     or (initial_heroes_position == 'bottom-right' and hero.x <= pushed_monster_coords['x'] and hero.y <= pushed_monster_coords['y']) \
                     or pushed_monster_rounds_count >= 4 \
