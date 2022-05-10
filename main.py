@@ -378,7 +378,8 @@ while True:
                         closest_enemy_to_hero_base_dist = math.hypot(closest_enemy_to_hero.x - enemy_base_x, closest_enemy_to_hero.y - enemy_base_y)
 
                     # shield the monster if it's really close and have enough health
-                    ### TO-DO: optimize shield (don't use it if it's not needed, it's a waste of MANA, e.g.: no enemy's around, or is too far)
+                    ### TO-DO: optimize shield (don't use it if it's not needed, it's a waste of MANA, e.g.: no enemy's around, or is too far...
+                    ### calculate how far he's from the monster vs how far the monster is from the base, i guess do this also for wnd_in_mnst)
                     ### TO-DO: try wnd_in_mnst before shield? because this would be faster (sometimes even when a monster is shielded successfully,
                     ### and is going for a kill, meanwhile the enemy scores goals into my base while i'm waiting for my monster to reach his base)
                     if my_mana >= 10 and (not monster.shield_life) and (not monster.is_controlled) and monster.threat_for == 2 \
